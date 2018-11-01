@@ -105,12 +105,19 @@ var __metadata = (undefined && undefined.__metadata) || function (k, v) {
 
 var AppComponent = /** @class */ (function () {
     function AppComponent() {
-        // FHIR.oauth2.authorize
         var _this = this;
         this.title = 'fhir';
         this.orders = [];
         this.conditions = [];
-        // FHIR.oauth2.ready();
+        // @ts-ignore
+        FHIR.oauth2.authorize({
+            'client': {
+                'client_id': 'dc54d8f3-a83f-4ffd-974c-2ddf98806a98',
+                'scope': 'patient/Patient.read patient/Observation.read launch online_access openid profile'
+            }
+        });
+        // @ts-ignore
+        FHIR.oauth2.ready(this.onReady, this.onError);
         // @ts-ignore
         this.smart = FHIR.client({
             serviceUrl: 'https://r2.smarthealthit.org',
@@ -139,6 +146,12 @@ var AppComponent = /** @class */ (function () {
     }
     AppComponent.prototype.ngOnInit = function () {
         // FHIR.oauth2.ready(this.oauth2ReadyCallback, this.oauth2ReadyErrback);
+    };
+    AppComponent.prototype.onReady = function (smart) {
+        console.log('Ready', smart);
+    };
+    AppComponent.prototype.onError = function (err) {
+        console.log('Error', err);
     };
     // @ts-ignore
     AppComponent.prototype.oauth2ReadyCallback = function (smartClient) {
