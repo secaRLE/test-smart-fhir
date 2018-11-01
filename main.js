@@ -111,10 +111,13 @@ var AppComponent = /** @class */ (function () {
         this.title = 'fhir';
         this.orders = [];
         this.conditions = [];
-    }
-    AppComponent.prototype.ngOnInit = function () {
         if (!this.auth.isLoggedIn()) {
             this.auth.authorizeClient();
+        }
+    }
+    AppComponent.prototype.ngOnInit = function () {
+        if (this.auth.isLoggedIn()) {
+            this.getPatientInfo();
         }
     };
     AppComponent.prototype.getPatientInfo = function () {
