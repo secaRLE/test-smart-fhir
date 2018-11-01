@@ -111,10 +111,10 @@ var AppComponent = /** @class */ (function () {
         this.conditions = [];
         // @ts-ignore
         FHIR.oauth2.authorize({
-            'client': {
-                'client_id': 'dc54d8f3-a83f-4ffd-974c-2ddf98806a98',
-                'scope': 'patient/Patient.read patient/Observation.read launch online_access openid profile'
-            }
+            //'client': {
+            'client_id': 'dc54d8f3-a83f-4ffd-974c-2ddf98806a98',
+            'scope': 'patient/Patient.read patient/Observation.read launch online_access openid profile'
+            //}
         });
         // @ts-ignore
         FHIR.oauth2.ready(this.onReady, this.onError);
