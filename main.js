@@ -111,24 +111,17 @@ var AppComponent = /** @class */ (function () {
         this.title = 'fhir';
         this.orders = [];
         this.conditions = [];
-        this.auth.authorizeClient();
     }
     AppComponent.prototype.ngOnInit = function () {
-        // FHIR.oauth2.ready(this.oauth2ReadyCallback, this.oauth2ReadyErrback);
+        var _this = this;
+        this.auth.clientSubject$
+            .subscribe(function (client) {
+            console.log(client);
+            if (!client) {
+                _this.auth.authorizeClient();
+            }
+        });
     };
-    /* authorize() {
-      console.log('going to authorize');
-      // @ts-ignore
-      FHIR.oauth2.authorize({
-        'client': {
-          'client_id': 'dc54d8f3-a83f-4ffd-974c-2ddf98806a98',
-          'scope': 'patient/Patient.read patient/Observation.read launch online_access openid profile'
-        },
-        'server': 'https://launch.smarthealthit.org/v/r3/sim/eyJoIjoiMSIsImoiOiIxIn0/fhir'
-      });
-  
-      this.getPatientInfo();
-    }*/
     AppComponent.prototype.getPatientInfo = function () {
         var _this = this;
         // @ts-ignore
@@ -230,6 +223,7 @@ var AppModule = /** @class */ (function () {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AuthService", function() { return AuthService; });
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! rxjs */ "./node_modules/rxjs/_esm5/index.js");
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -240,8 +234,14 @@ var __metadata = (undefined && undefined.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 
+
 var AuthService = /** @class */ (function () {
     function AuthService() {
+        /**
+         * Saved SMART client after authentification
+         */
+        this.clientSubject = new rxjs__WEBPACK_IMPORTED_MODULE_1__["Subject"]();
+        this.clientSubject$ = this.clientSubject.asObservable();
     }
     AuthService.prototype.authorizeClient = function () {
         console.log('going to authorize');
@@ -258,6 +258,7 @@ var AuthService = /** @class */ (function () {
     };
     // @ts-ignore
     AuthService.prototype.onReady = function (smartClient) {
+        this.clientSubject.next(smartClient);
         console.log('Ready', smartClient);
     };
     AuthService.prototype.onError = function (err) {
