@@ -129,14 +129,11 @@ var AppComponent = /** @class */ (function () {
             }
         });
         // Search for the current patient's prescriptions
-        this.smart.patient.api.search({ type: 'Observation' })
+        this.smart.patient.api.search({ type: 'MedicationOrder' })
             .done(function (orders) {
             for (var _i = 0, _a = orders.data.entry; _i < _a.length; _i++) {
                 var order = _a[_i];
-                console.log(order);
-                _this.orders.push(order.resource.code.text + ': ' +
-                    +order.resource.valueQuantity.value + ' ' + order.resource.valueQuantity.unit);
-                // this.orders.push(order.resource.medicationCodeableConcept.text);
+                _this.orders.push(order.resource.medicationCodeableConcept.text);
             }
         });
     }
