@@ -105,19 +105,37 @@ var __metadata = (undefined && undefined.__metadata) || function (k, v) {
 
 var AppComponent = /** @class */ (function () {
     function AppComponent() {
-        var _this = this;
         this.title = 'fhir';
         this.orders = [];
         this.conditions = [];
+        this.authorize();
+        // @ts-ignore
+        FHIR.oauth2.ready(this.onReady, this.onError);
+    }
+    AppComponent.prototype.ngOnInit = function () {
+        // FHIR.oauth2.ready(this.oauth2ReadyCallback, this.oauth2ReadyErrback);
+    };
+    // @ts-ignore
+    AppComponent.prototype.onReady = function (smartClient) {
+        console.log('Ready', smartClient);
+    };
+    AppComponent.prototype.onError = function (err) {
+        console.log('Error', err);
+    };
+    AppComponent.prototype.authorize = function () {
+        console.log('going to authorize');
         // @ts-ignore
         FHIR.oauth2.authorize({
             'client': {
                 'client_id': 'dc54d8f3-a83f-4ffd-974c-2ddf98806a98',
                 'scope': 'patient/Patient.read patient/Observation.read launch online_access openid profile'
-            }
+            },
+            'server': 'https://launch.smarthealthit.org/v/r3/sim/eyJoIjoiMSIsImoiOiIxIn0/fhir'
         });
-        // @ts-ignore
-        FHIR.oauth2.ready(this.onReady, this.onError);
+        this.getPatientInfo();
+    };
+    AppComponent.prototype.getPatientInfo = function () {
+        var _this = this;
         // @ts-ignore
         this.smart = FHIR.client({
             serviceUrl: 'https://r2.smarthealthit.org',
@@ -143,30 +161,6 @@ var AppComponent = /** @class */ (function () {
                 _this.orders.push(order.resource.medicationCodeableConcept.text);
             }
         });
-    }
-    AppComponent.prototype.ngOnInit = function () {
-        // FHIR.oauth2.ready(this.oauth2ReadyCallback, this.oauth2ReadyErrback);
-    };
-    AppComponent.prototype.onReady = function (smart) {
-        console.log('Ready', smart);
-    };
-    AppComponent.prototype.onError = function (err) {
-        console.log('Error', err);
-    };
-    // @ts-ignore
-    AppComponent.prototype.oauth2ReadyCallback = function (smartClient) {
-        console.log('Ready callback');
-    };
-    AppComponent.prototype.oauth2ReadyErrback = function (error) {
-        console.log('Ready errback', error);
-    };
-    AppComponent.prototype.switchPatient = function () {
-        var oauth2Configuration = {
-            'client': {
-                'client_id': 'clientid',
-                'scope': 'openid profile'
-            }
-        };
     };
     AppComponent = __decorate([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Component"])({
