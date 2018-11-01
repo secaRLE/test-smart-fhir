@@ -113,14 +113,9 @@ var AppComponent = /** @class */ (function () {
         this.conditions = [];
     }
     AppComponent.prototype.ngOnInit = function () {
-        var _this = this;
-        this.auth.clientSubject$
-            .subscribe(function (client) {
-            console.log(client);
-            if (!client) {
-                _this.auth.authorizeClient();
-            }
-        });
+        if (!this.auth.isLoggedIn()) {
+            this.auth.authorizeClient();
+        }
     };
     AppComponent.prototype.getPatientInfo = function () {
         var _this = this;
@@ -240,8 +235,8 @@ var AuthService = /** @class */ (function () {
         /**
          * Saved SMART client after authentification
          */
-        this.clientSubject = new rxjs__WEBPACK_IMPORTED_MODULE_1__["Subject"]();
-        this.clientSubject$ = this.clientSubject.asObservable();
+        this.smartClient = new rxjs__WEBPACK_IMPORTED_MODULE_1__["BehaviorSubject"](null);
+        this.smartClient$ = this.smartClient.asObservable();
     }
     AuthService.prototype.authorizeClient = function () {
         console.log('going to authorize');
@@ -256,13 +251,17 @@ var AuthService = /** @class */ (function () {
         // @ts-ignore
         FHIR.oauth2.ready(this.onReady, this.onError);
     };
+    AuthService.prototype.isLoggedIn = function () {
+        return localStorage.getItem('loggedIn');
+    };
     // @ts-ignore
     AuthService.prototype.onReady = function (smartClient) {
-        this.clientSubject.next(smartClient);
-        console.log('Ready', smartClient);
+        localStorage.setItem('loggedIn', 'true');
+        this.smartClient.next(smartClient);
     };
     AuthService.prototype.onError = function (err) {
-        console.log('Error', err);
+        localStorage.setItem('loggedIn', 'false');
+        this.smartClient.next(null);
     };
     AuthService = __decorate([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Injectable"])({
