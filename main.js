@@ -250,8 +250,8 @@ var AuthService = /** @class */ (function () {
             'client': {
                 'client_id': 'dc54d8f3-a83f-4ffd-974c-2ddf98806a98',
                 'scope': 'patient/Patient.read patient/Observation.read launch online_access openid profile'
-            },
-            'server': 'https://fhir-ehr.sandboxcerner.com/dstu2/0b8a0111-e8e6-4c26-a91c-5069cbc6b1ca' // TODO: there should be another server eventually
+            }
+            //'server': 'https://fhir-ehr.sandboxcerner.com/dstu2/0b8a0111-e8e6-4c26-a91c-5069cbc6b1ca' // TODO: there should be another server eventually
             //'server': 'https://launch.smarthealthit.org/v/r3/sim/eyJoIjoiMSIsImoiOiIxIn0/fhir' // TODO: there should be another server eventually
         });
         // @ts-ignore
