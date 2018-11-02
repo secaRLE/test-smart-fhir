@@ -113,7 +113,7 @@ var AppComponent = /** @class */ (function () {
         this.conditions = [];
         if (!this.auth.isLoggedIn()) {
             console.log(location);
-            var params = new URLSearchParams(location.href);
+            var params = new URLSearchParams(location.search);
             var api_server = params.get('iss');
             this.auth.authorizeClient(api_server);
         }
