@@ -112,7 +112,10 @@ var AppComponent = /** @class */ (function () {
         this.orders = [];
         this.conditions = [];
         if (!this.auth.isLoggedIn()) {
-            this.auth.authorizeClient();
+            console.log(location);
+            var params = new URLSearchParams(location.href);
+            var api_server = params.get('iss');
+            this.auth.authorizeClient(api_server);
         }
     }
     AppComponent.prototype.ngOnInit = function () {
@@ -244,14 +247,14 @@ var AuthService = /** @class */ (function () {
         this.smartClient$ = this.smartClient.asObservable();
         console.log(this._smartClient);
     }
-    AuthService.prototype.authorizeClient = function () {
+    AuthService.prototype.authorizeClient = function (api_server) {
         // @ts-ignore
         FHIR.oauth2.authorize({
             'client': {
                 'client_id': 'dc54d8f3-a83f-4ffd-974c-2ddf98806a98',
                 'scope': 'patient/Patient.read patient/Observation.read launch online_access openid profile'
-            }
-            //'server': 'https://fhir-ehr.sandboxcerner.com/dstu2/0b8a0111-e8e6-4c26-a91c-5069cbc6b1ca' // TODO: there should be another server eventually
+            },
+            'server': api_server
             //'server': 'https://launch.smarthealthit.org/v/r3/sim/eyJoIjoiMSIsImoiOiIxIn0/fhir' // TODO: there should be another server eventually
         });
         // @ts-ignore
