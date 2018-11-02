@@ -116,7 +116,12 @@ var AppComponent = /** @class */ (function () {
         }
     }
     AppComponent.prototype.ngOnInit = function () {
+        this.smartClient$ = this.auth.smartClient$;
+        this.smartClient$.subscribe(function (client) { return console.log('client', client); });
         if (this.auth.isLoggedIn()) {
+            this.auth.smartClient$.subscribe(function (smartClient) {
+                console.log(smartClient);
+            });
             this.getPatientInfo();
         }
     };
@@ -235,35 +240,40 @@ var __metadata = (undefined && undefined.__metadata) || function (k, v) {
 
 var AuthService = /** @class */ (function () {
     function AuthService() {
-        /**
-         * Saved SMART client after authentification
-         */
         this.smartClient = new rxjs__WEBPACK_IMPORTED_MODULE_1__["BehaviorSubject"](null);
         this.smartClient$ = this.smartClient.asObservable();
+        console.log(this._smartClient);
     }
     AuthService.prototype.authorizeClient = function () {
-        console.log('going to authorize');
         // @ts-ignore
         FHIR.oauth2.authorize({
             'client': {
                 'client_id': 'dc54d8f3-a83f-4ffd-974c-2ddf98806a98',
                 'scope': 'patient/Patient.read patient/Observation.read launch online_access openid profile'
             },
-            'server': 'https://launch.smarthealthit.org/v/r3/sim/eyJoIjoiMSIsImoiOiIxIn0/fhir'
+            'server': 'https://fhir-ehr.sandboxcerner.com/dstu2/0b8a0111-e8e6-4c26-a91c-5069cbc6b1ca' // TODO: there should be another server eventually
+            //'server': 'https://launch.smarthealthit.org/v/r3/sim/eyJoIjoiMSIsImoiOiIxIn0/fhir' // TODO: there should be another server eventually
         });
         // @ts-ignore
         FHIR.oauth2.ready(this.onReady, this.onError);
     };
     AuthService.prototype.isLoggedIn = function () {
-        return localStorage.getItem('loggedIn');
+        return localStorage.getItem('token');
     };
     // @ts-ignore
     AuthService.prototype.onReady = function (smartClient) {
-        localStorage.setItem('loggedIn', 'true');
+        this._smartClient = smartClient;
+        localStorage.setItem('token', smartClient.tokenResponse.access_token);
         this.smartClient.next(smartClient);
+        if (smartClient.hasOwnProperty('patient')) {
+            alert('patient');
+        }
+        else {
+            alert('no patient');
+        }
     };
     AuthService.prototype.onError = function (err) {
-        localStorage.setItem('loggedIn', 'false');
+        localStorage.removeItem('token');
         this.smartClient.next(null);
     };
     AuthService = __decorate([
