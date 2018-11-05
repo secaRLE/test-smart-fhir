@@ -35,6 +35,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AppRoutingModule", function() { return AppRoutingModule; });
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
 /* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/router */ "./node_modules/@angular/router/fesm5/router.js");
+/* harmony import */ var _patient_info_patient_info_component__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./patient-info/patient-info.component */ "./src/app/patient-info/patient-info.component.ts");
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -43,7 +44,13 @@ var __decorate = (undefined && undefined.__decorate) || function (decorators, ta
 };
 
 
-var routes = [];
+
+var routes = [
+    {
+        path: 'start',
+        component: _patient_info_patient_info_component__WEBPACK_IMPORTED_MODULE_2__["PatientInfoComponent"]
+    }
+];
 var AppRoutingModule = /** @class */ (function () {
     function AppRoutingModule() {
     }
@@ -67,7 +74,7 @@ var AppRoutingModule = /** @class */ (function () {
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<!--The content below is only a placeholder and can be replaced.-->\n<div style=\"text-align:center\">\n  <h1>\n    Welcome {{ patientName }}!\n  </h1>\n</div>\n<h2>Here is some data for you:</h2>\n\n<p>Prescriptions:</p>\n<ul>\n  <li *ngFor=\"let order of orders\">{{order}}</li>\n</ul>\n\n<p>Conditions:</p>\n<ul>\n  <li *ngFor=\"let condition of conditions\">{{condition}}</li>\n</ul>\n\n<router-outlet></router-outlet>\n"
+module.exports = "<!--The content below is only a placeholder and can be replaced.-->\n<div *ngIf=\"!displaySubmitButton\">\n  <div style=\"text-align:center\">\n    <h1>\n      Welcome {{ patientName }}!\n    </h1>\n  </div>\n  <h2>Here is some data for you:</h2>\n\n  <p>Prescriptions:</p>\n  <ul>\n    <li *ngFor=\"let order of orders\">{{order}}</li>\n  </ul>\n\n  <p>Conditions:</p>\n  <ul>\n    <li *ngFor=\"let condition of conditions\">{{condition}}</li>\n  </ul>\n</div>\n\n<div *ngIf=\"displaySubmitButton\">\n  <button (click)=\"authorize()\">Sign in</button>\n</div>\n\n\n<router-outlet></router-outlet>\n"
 
 /***/ }),
 
@@ -94,6 +101,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AppComponent", function() { return AppComponent; });
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
 /* harmony import */ var _services_auth_service__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./services/auth.service */ "./src/app/services/auth.service.ts");
+/* harmony import */ var _services_fhir_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./services/fhir.service */ "./src/app/services/fhir.service.ts");
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -105,28 +113,92 @@ var __metadata = (undefined && undefined.__metadata) || function (k, v) {
 };
 
 
+
 var AppComponent = /** @class */ (function () {
-    function AppComponent(auth) {
+    function AppComponent(auth, fhir) {
         this.auth = auth;
+        this.fhir = fhir;
         this.title = 'fhir';
         this.orders = [];
         this.conditions = [];
-        if (!this.auth.isLoggedIn()) {
-            console.log(location);
-            var params = new URLSearchParams(location.search);
-            var api_server = params.get('iss');
-            this.auth.authorizeClient(api_server);
-        }
+        this.initialize({
+            'client_id': 'dc54d8f3-a83f-4ffd-974c-2ddf98806a98',
+            'scope': 'patient/Patient.read patient/Observation.read launch online_access openid profile'
+        });
     }
+    // Save config to local storage on init
+    AppComponent.prototype.initialize = function (settings) {
+        var params = new URLSearchParams(location.search);
+        this.writeData('app-config', {
+            client_id: settings.client_id,
+            //secret        : settings.secret,
+            scope: settings.scope + ' launch',
+            launch_id: params.get('launch'),
+            api_server_uri: params.get('iss')
+        });
+        // clearAuthToken();
+        //refreshApp();
+    };
     AppComponent.prototype.ngOnInit = function () {
-        this.smartClient$ = this.auth.smartClient$;
-        this.smartClient$.subscribe(function (client) { return console.log('client', client); });
-        if (this.auth.isLoggedIn()) {
-            this.auth.smartClient$.subscribe(function (smartClient) {
-                console.log(smartClient);
-            });
-            this.getPatientInfo();
+        // check if token already exists
+        var token = localStorage.getItem('token');
+        console.log('token', token);
+        if (!token) {
+            var params = new URLSearchParams(location.search);
+            var code = params.get('code'); // code is sent when the EHR authorization server redirects the browser to the app’s redirect_uri
+            console.log('params code', code);
+            if (!code) {
+                this.displaySubmitButton = true;
+            }
         }
+        /*this.isLoggedIn$ = this.auth.isLoggedIn;
+        this.isLoggedIn$.subscribe(isLoggedIn => {
+          console.log('logged in', isLoggedIn);
+    
+          if (isLoggedIn) {
+            console.log(location);
+            const params =  new URLSearchParams(location.search);
+            if (params.get('code')) {
+              this.fhir.completeAuthentication();
+            }
+          } else {
+            console.log(location);
+            const params =  new URLSearchParams(location.search);
+            const api_server = params.get('iss');
+            this.fhir.authorizeClient(api_server);
+          }
+        });*/
+        //this.smartClient$ = this.fhir.smartClient$;
+        //this.smartClient$.subscribe(client => console.log('client', client));
+        /*if (this.auth.isLoggedIn()) {
+          this.fhir.smartClient$.subscribe(smartClient => {
+            console.log(smartClient);
+          });
+    
+          this.getPatientInfo();
+        }*/
+    };
+    AppComponent.prototype.readData = function (key) {
+        var data = localStorage[key];
+        if (data) {
+            return JSON.parse(data);
+        }
+        return data;
+    };
+    AppComponent.prototype.writeData = function (key, data) {
+        localStorage[key] = JSON.stringify(data);
+    };
+    AppComponent.prototype.authorize = function () {
+        var config = this.readData('app-config');
+        // @ts-ignore
+        FHIR.oauth2.authorize({
+            'client': {
+                'client_id': config.client_id,
+                'scope': config.scope,
+                'launch': config.launch_id
+            },
+            'server': config.api_server_uri
+        });
     };
     AppComponent.prototype.getPatientInfo = function () {
         var _this = this;
@@ -162,7 +234,7 @@ var AppComponent = /** @class */ (function () {
             template: __webpack_require__(/*! ./app.component.html */ "./src/app/app.component.html"),
             styles: [__webpack_require__(/*! ./app.component.scss */ "./src/app/app.component.scss")]
         }),
-        __metadata("design:paramtypes", [_services_auth_service__WEBPACK_IMPORTED_MODULE_1__["AuthService"]])
+        __metadata("design:paramtypes", [_services_auth_service__WEBPACK_IMPORTED_MODULE_1__["AuthService"], _services_fhir_service__WEBPACK_IMPORTED_MODULE_2__["FhirService"]])
     ], AppComponent);
     return AppComponent;
 }());
@@ -185,6 +257,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
 /* harmony import */ var _app_routing_module__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./app-routing.module */ "./src/app/app-routing.module.ts");
 /* harmony import */ var _app_component__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./app.component */ "./src/app/app.component.ts");
+/* harmony import */ var _patient_info_patient_info_component__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./patient-info/patient-info.component */ "./src/app/patient-info/patient-info.component.ts");
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -195,13 +268,15 @@ var __decorate = (undefined && undefined.__decorate) || function (decorators, ta
 
 
 
+
 var AppModule = /** @class */ (function () {
     function AppModule() {
     }
     AppModule = __decorate([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["NgModule"])({
             declarations: [
-                _app_component__WEBPACK_IMPORTED_MODULE_3__["AppComponent"]
+                _app_component__WEBPACK_IMPORTED_MODULE_3__["AppComponent"],
+                _patient_info_patient_info_component__WEBPACK_IMPORTED_MODULE_4__["PatientInfoComponent"]
             ],
             imports: [
                 _angular_platform_browser__WEBPACK_IMPORTED_MODULE_0__["BrowserModule"],
@@ -212,6 +287,69 @@ var AppModule = /** @class */ (function () {
         })
     ], AppModule);
     return AppModule;
+}());
+
+
+
+/***/ }),
+
+/***/ "./src/app/patient-info/patient-info.component.html":
+/*!**********************************************************!*\
+  !*** ./src/app/patient-info/patient-info.component.html ***!
+  \**********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = "<p>\n  patient-info works!\n</p>\n"
+
+/***/ }),
+
+/***/ "./src/app/patient-info/patient-info.component.scss":
+/*!**********************************************************!*\
+  !*** ./src/app/patient-info/patient-info.component.scss ***!
+  \**********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = "\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IiIsImZpbGUiOiJzcmMvYXBwL3BhdGllbnQtaW5mby9wYXRpZW50LWluZm8uY29tcG9uZW50LnNjc3MifQ== */"
+
+/***/ }),
+
+/***/ "./src/app/patient-info/patient-info.component.ts":
+/*!********************************************************!*\
+  !*** ./src/app/patient-info/patient-info.component.ts ***!
+  \********************************************************/
+/*! exports provided: PatientInfoComponent */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "PatientInfoComponent", function() { return PatientInfoComponent; });
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
+var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (undefined && undefined.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
+var PatientInfoComponent = /** @class */ (function () {
+    function PatientInfoComponent() {
+    }
+    PatientInfoComponent.prototype.ngOnInit = function () {
+    };
+    PatientInfoComponent = __decorate([
+        Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Component"])({
+            selector: 'app-patient-info',
+            template: __webpack_require__(/*! ./patient-info.component.html */ "./src/app/patient-info/patient-info.component.html"),
+            styles: [__webpack_require__(/*! ./patient-info.component.scss */ "./src/app/patient-info/patient-info.component.scss")]
+        }),
+        __metadata("design:paramtypes", [])
+    ], PatientInfoComponent);
+    return PatientInfoComponent;
 }());
 
 
@@ -236,35 +374,81 @@ var __decorate = (undefined && undefined.__decorate) || function (decorators, ta
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+
+
+var AuthService = /** @class */ (function () {
+    function AuthService() {
+        this.loggedIn = new rxjs__WEBPACK_IMPORTED_MODULE_1__["BehaviorSubject"](false);
+    }
+    Object.defineProperty(AuthService.prototype, "isLoggedIn", {
+        get: function () {
+            var loggedIn = localStorage.getItem('token') ? true : false;
+            this.loggedIn.next(loggedIn);
+            return this.loggedIn.asObservable();
+        },
+        enumerable: true,
+        configurable: true
+    });
+    AuthService = __decorate([
+        Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Injectable"])({
+            providedIn: 'root'
+        })
+    ], AuthService);
+    return AuthService;
+}());
+
+
+
+/***/ }),
+
+/***/ "./src/app/services/fhir.service.ts":
+/*!******************************************!*\
+  !*** ./src/app/services/fhir.service.ts ***!
+  \******************************************/
+/*! exports provided: FhirService */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FhirService", function() { return FhirService; });
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! rxjs */ "./node_modules/rxjs/_esm5/index.js");
+var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
 var __metadata = (undefined && undefined.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 
 
-var AuthService = /** @class */ (function () {
-    function AuthService() {
+// import * as fh from 'fhir-js-client';
+var FhirService = /** @class */ (function () {
+    function FhirService() {
         this.smartClient = new rxjs__WEBPACK_IMPORTED_MODULE_1__["BehaviorSubject"](null);
         this.smartClient$ = this.smartClient.asObservable();
-        console.log(this._smartClient);
+        //console.log(this._smartClient);
     }
-    AuthService.prototype.authorizeClient = function (api_server) {
+    FhirService.prototype.authorizeClient = function (config) {
         // @ts-ignore
-        FHIR.oauth2.authorize({
-            'client': {
-                'client_id': 'dc54d8f3-a83f-4ffd-974c-2ddf98806a98',
-                'scope': 'patient/Patient.read patient/Observation.read launch online_access openid profile'
-            },
-            'server': api_server
-            //'server': 'https://launch.smarthealthit.org/v/r3/sim/eyJoIjoiMSIsImoiOiIxIn0/fhir' // TODO: there should be another server eventually
-        });
-        // @ts-ignore
-        FHIR.oauth2.ready(this.onReady, this.onError);
+        FHIR.oauth2.authorize(config);
+        /*FHIR.oauth2.authorize({
+          'client': {
+            'client_id': 'dc54d8f3-a83f-4ffd-974c-2ddf98806a98',
+            'scope': 'patient/Patient.read patient/Observation.read launch online_access openid profile'
+          },
+          'server': api_server
+        });*/
     };
-    AuthService.prototype.isLoggedIn = function () {
-        return localStorage.getItem('token');
+    FhirService.prototype.completeAuthentication = function () {
+        //console.log('completeAuthentication');
+        // @ts-ignore
+        return FHIR.oauth2.ready(this.onReady, this.onError);
     };
     // @ts-ignore
-    AuthService.prototype.onReady = function (smartClient) {
+    FhirService.prototype.onReady = function (smartClient) {
         this._smartClient = smartClient;
         localStorage.setItem('token', smartClient.tokenResponse.access_token);
         this.smartClient.next(smartClient);
@@ -275,17 +459,17 @@ var AuthService = /** @class */ (function () {
             alert('no patient');
         }
     };
-    AuthService.prototype.onError = function (err) {
+    FhirService.prototype.onError = function (err) {
         localStorage.removeItem('token');
         this.smartClient.next(null);
     };
-    AuthService = __decorate([
+    FhirService = __decorate([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Injectable"])({
             providedIn: 'root'
         }),
         __metadata("design:paramtypes", [])
-    ], AuthService);
-    return AuthService;
+    ], FhirService);
+    return FhirService;
 }());
 
 
