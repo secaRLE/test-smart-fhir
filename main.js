@@ -184,6 +184,7 @@ var AppComponent = /** @class */ (function () {
         var _this = this;
         // @ts-ignore
         FHIR.oauth2.ready(function (smart) {
+            console.log(smart);
             smart.patient.read().then(function (smartPatient) {
                 _this._zone.run(function () {
                     _this.patient = smartPatient.name[0].family + ' ' + smartPatient.name[0].given.join(' ');
