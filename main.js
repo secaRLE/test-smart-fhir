@@ -74,7 +74,7 @@ var AppRoutingModule = /** @class */ (function () {
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<!--The content below is only a placeholder and can be replaced.-->\n<div *ngIf=\"!displaySignInButton\">\n  <div style=\"text-align:center\">\n    <h1 *ngIf=\"patient\">\n      Welcome {{ patient }}!\n    </h1>\n  </div>\n  <h2>Here is some data for you:</h2>\n\n  <p>Prescriptions:</p>\n  <ul>\n    <li *ngFor=\"let order of orders\">{{order}}</li>\n  </ul>\n\n  <p>Conditions:</p>\n  <ul>\n    <li *ngFor=\"let condition of conditions\">{{condition}}</li>\n  </ul>\n</div>\n\n<div *ngIf=\"displaySignInButton\">\n  <p>You are not yet authorized, please sign in</p>\n  <button (click)=\"authorize()\">Sign in</button>\n</div>\n\n\n<router-outlet></router-outlet>\n"
+module.exports = "<!--The content below is only a placeholder and can be replaced.-->\n<div *ngIf=\"!displaySignInButton\">\n\n  <div style=\"margin-left: 30px;\">\n    <h1 *ngIf=\"patient\">Welcome {{ patient }}!</h1>\n  </div>\n\n  <div style=\"width: 40%; float: left; padding-left: 30px;\">\n    <h2>Here is some data for you:</h2>\n\n    <p>Prescriptions:</p>\n    <ul>\n      <li *ngFor=\"let order of orders\">{{order}}</li>\n    </ul>\n\n    <p>Conditions:</p>\n    <ul>\n      <li *ngFor=\"let condition of conditions\">{{condition}}</li>\n    </ul>\n\n    <div style=\"padding: 10px; border-top: 1px solid gray; max-width: 90%;\">\n      <h3>Create new measurement data</h3>\n      <form #measurementForm=\"ngForm\" (ngSubmit)=\"createObservation()\">\n        <input name=\"weight\" type=\"number\" placeholder=\"Weight\" [(ngModel)]=\"measurement.weight\"><br><br>\n        <input name=\"height\" type=\"number\" placeholder=\"Height\" [(ngModel)]=\"measurement.height\"><br><br>\n        <button type=\"submit\">New measurements</button>\n      </form>\n    </div>\n\n    <div *ngIf=\"observations\">\n      <h2 style=\"display: inline-block; padding-right: 30px;\">All measurements ({{observations.length}})</h2>\n      <button style=\"display: inline-block;\" (click)=\"getObservation()\">Update</button>\n      <ul>\n        <li *ngFor=\"let obs of observations\" style=\"margin-bottom: 5px\">\n          <span *ngIf=\"!obs.code; else observation\">Is being deleted...</span>\n          <ng-template #observation>\n            {{obs?.code?.text}}: {{obs?.valueQuantity?.value}} {{obs?.valueQuantity?.unit}}\n            <button (click)=\"deleteObservation(obs)\" style=\"margin-left: 5px\">Delete</button>\n          </ng-template>\n          <br><span style=\"font-size: 12px\">(resourceId: {{obs?.id}})</span>\n        </li>\n      </ul>\n    </div>\n  </div>\n\n  <div style=\"width: 60%; float: right; padding-right: 30px;\">\n    <p-chart type=\"line\" [data]=\"visualizationData\"></p-chart>\n  </div>\n</div>\n\n<div *ngIf=\"displaySignInButton\">\n  <p>You are not yet authorized, please sign in</p>\n  <button (click)=\"authorize()\">Sign in</button>\n</div>\n\n\n<router-outlet></router-outlet>\n"
 
 /***/ }),
 
@@ -101,8 +101,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AppComponent", function() { return AppComponent; });
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
 /* harmony import */ var _services_auth_service__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./services/auth.service */ "./src/app/services/auth.service.ts");
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! rxjs */ "./node_modules/rxjs/_esm5/index.js");
-/* harmony import */ var _services_fhir_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./services/fhir.service */ "./src/app/services/fhir.service.ts");
+/* harmony import */ var _services_fhir_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./services/fhir.service */ "./src/app/services/fhir.service.ts");
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -115,16 +114,15 @@ var __metadata = (undefined && undefined.__metadata) || function (k, v) {
 
 
 
-
 var AppComponent = /** @class */ (function () {
     function AppComponent(auth, fhir, _zone) {
         this.auth = auth;
         this.fhir = fhir;
         this._zone = _zone;
-        this.title = 'fhir';
-        this.smartClientSubject = new rxjs__WEBPACK_IMPORTED_MODULE_2__["ReplaySubject"](1);
+        this.title = 'Test SMART on FHIR';
         this.orders = [];
         this.conditions = [];
+        this.measurement = { weight: null, height: null };
         this.initialize({
             'client_id': 'dc54d8f3-a83f-4ffd-974c-2ddf98806a98',
             'scope': 'patient/Patient.read patient/Observation.read launch online_access openid profile'
@@ -180,17 +178,18 @@ var AppComponent = /** @class */ (function () {
         });
     };
     AppComponent.prototype.getPatientInfo = function () {
+        var _this_1 = this;
         // TODO: Handle scope issues over observables
         var _this = this;
         // @ts-ignore
         FHIR.oauth2.ready(function (smart) {
-            console.log(smart);
+            // Get the patient from EMR
             smart.patient.read().then(function (smartPatient) {
                 _this._zone.run(function () {
                     _this.patient = smartPatient.name[0].family + ' ' + smartPatient.name[0].given.join(' ');
-                    console.log(_this.patient);
                 });
             });
+            // Get patient's ilnesses
             smart.patient.api.search({ type: 'Condition' })
                 .done(function (conditions) {
                 _this._zone.run(function () {
@@ -200,6 +199,7 @@ var AppComponent = /** @class */ (function () {
                     }
                 });
             });
+            // Get patient's prescriptions
             smart.patient.api.search({ type: 'MedicationOrder' })
                 .done(function (orders) {
                 _this._zone.run(function () {
@@ -209,6 +209,202 @@ var AppComponent = /** @class */ (function () {
                     }
                 });
             });
+            _this_1.getObservation();
+        });
+    };
+    AppComponent.prototype.getObservation = function () {
+        var _this_1 = this;
+        var _this = this;
+        // @ts-ignore
+        FHIR.oauth2.ready(function (smart) {
+            // Get patient observations by their codes
+            smart.patient.api.fetchAll({
+                type: 'Observation',
+                query: {
+                    code: {
+                        $or: ['http://loinc.org|8302-2', 'http://loinc.org|29463-7'] // codes for height and weigh
+                    }
+                }
+            }).then(function (resp) {
+                _this._zone.run(function () {
+                    console.log(resp);
+                    var sorted = resp.sort(function (a, b) { return new Date(a.effectiveDateTime).getTime() - new Date(b.effectiveDateTime).getTime(); });
+                    _this_1.observations = sorted;
+                    _this.drawVisualization(resp);
+                });
+            });
+        });
+    };
+    AppComponent.prototype.drawVisualization = function (data) {
+        // TODO: not good, use observables
+        var _this = this;
+        _this.visualizationData = {};
+        _this.visualizationData.datasets = [];
+        // Labels
+        _this.visualizationData.labels = [];
+        var _loop_1 = function (date) {
+            var d = new Date(date.effectiveDateTime);
+            var dateString = d.toDateString();
+            if (!this_1.visualizationData.labels.find(function (v) { return v === dateString; })) {
+                _this.visualizationData.labels.push(dateString);
+            }
+        };
+        var this_1 = this;
+        for (var _i = 0, data_1 = data; _i < data_1.length; _i++) {
+            var date = data_1[_i];
+            _loop_1(date);
+        }
+        // Get weight and height
+        var weightDataset = this.getWeight(data);
+        var heightDataset = this.getHeight(data);
+        _this.visualizationData.datasets.push(weightDataset);
+        _this.visualizationData.datasets.push(heightDataset);
+        // calculate BMI
+        var bmiDataset = this.calculateBmi(_this.visualizationData.datasets);
+        _this.visualizationData.datasets.push(bmiDataset);
+    };
+    AppComponent.prototype.getWeight = function (data) {
+        var weight = data.filter(function (val) {
+            var condition = val.code ? (val.code.text === 'Body Weight') : false; // after deleting code.text is empty for some reason
+            return condition;
+        });
+        var weightData = [];
+        for (var _i = 0, weight_1 = weight; _i < weight_1.length; _i++) {
+            var val = weight_1[_i];
+            weightData.push(val.valueQuantity.value);
+        }
+        return {
+            label: 'Body Weight',
+            data: weightData,
+            fill: false,
+            borderColor: '#4bc0c0'
+        };
+    };
+    AppComponent.prototype.getHeight = function (data) {
+        var height = data.filter(function (val) {
+            var condition = val.code ? (val.code.text === 'Body Height') : false;
+            return condition;
+        });
+        var heightData = [];
+        for (var _i = 0, height_1 = height; _i < height_1.length; _i++) {
+            var val = height_1[_i];
+            heightData.push(val.valueQuantity.value);
+        }
+        return {
+            label: 'Body Height',
+            data: heightData,
+            fill: false,
+            borderColor: '#565656'
+        };
+    };
+    AppComponent.prototype.calculateBmi = function (data) {
+        var bmiData = [];
+        for (var index in data[0].data) {
+            var bmi = data[0].data[index] / (data[1].data[index] * data[1].data[index] / 10000);
+            bmiData.push(bmi);
+        }
+        return {
+            label: 'BMI',
+            data: bmiData,
+            fill: false,
+            borderColor: '#FFD800'
+        };
+    };
+    AppComponent.prototype.createObservation = function () {
+        var _this_1 = this;
+        // @ts-ignore
+        FHIR.oauth2.ready(function (smart) {
+            var date = (new Date()).toISOString();
+            var resourceHeight = {
+                'resourceType': 'Observation',
+                'status': 'final',
+                'category': {
+                    'coding': [{
+                            'system': 'http://hl7.org/fhir/observation-category',
+                            'code': 'vital-signs'
+                        }]
+                },
+                'code': {
+                    'coding': [{
+                            'system': 'http://loinc.org',
+                            'code': '8302-2',
+                            'display': 'Body Height'
+                        }],
+                    'text': 'Body Height'
+                },
+                'subject': {
+                    'reference': 'Patient/' + smart.patient.id
+                },
+                'effectiveDateTime': date,
+                'issued': date,
+                'valueQuantity': {
+                    'value': _this_1.measurement.height,
+                    'unit': 'cm',
+                    'system': 'http://unitsofmeasure.org/',
+                    'code': 'cm'
+                }
+            };
+            var resourceWeight = {
+                'resourceType': 'Observation',
+                'status': 'final',
+                'category': {
+                    'coding': [
+                        {
+                            'system': 'http://hl7.org/fhir/observation-category',
+                            'code': 'vital-signs'
+                        }
+                    ]
+                },
+                'code': {
+                    'coding': [
+                        {
+                            'system': 'http://loinc.org',
+                            'code': '29463-7',
+                            'display': 'Body Weight'
+                        }
+                    ],
+                    'text': 'Body Weight'
+                },
+                'subject': {
+                    'reference': 'Patient/' + smart.patient.id
+                },
+                'effectiveDateTime': date,
+                'issued': date,
+                'valueQuantity': {
+                    'value': _this_1.measurement.weight,
+                    'unit': 'kg',
+                    'system': 'http://unitsofmeasure.org/',
+                    'code': 'kg'
+                }
+            };
+            smart.api.create({ resource: resourceHeight }).then(function (resp) {
+                console.log(resp);
+            }).then(function () {
+                smart.api.create({ resource: resourceWeight }).then(function (res) {
+                    console.log(res);
+                });
+            });
+        });
+    };
+    AppComponent.prototype.deleteObservation = function (obs) {
+        var _this = this;
+        console.log(obs);
+        var obj = {
+            resource: {
+                resourceType: 'Observation',
+                id: obs.id
+            }
+        };
+        // @ts-ignore
+        FHIR.oauth2.ready(function (smart) {
+            smart.api.delete(obj).then(function (resp) {
+                _this._zone.run(function () {
+                    var filtered = _this.observations.filter(function (res) { return res.id !== obs.id; });
+                    console.log(filtered);
+                    _this.observations = filtered;
+                    console.log(_this.observations);
+                });
+            }, function (err) { return console.log(err); });
         });
     };
     AppComponent = __decorate([
@@ -216,8 +412,10 @@ var AppComponent = /** @class */ (function () {
             selector: 'app-root',
             template: __webpack_require__(/*! ./app.component.html */ "./src/app/app.component.html"),
             styles: [__webpack_require__(/*! ./app.component.scss */ "./src/app/app.component.scss")]
-        }),
-        __metadata("design:paramtypes", [_services_auth_service__WEBPACK_IMPORTED_MODULE_1__["AuthService"], _services_fhir_service__WEBPACK_IMPORTED_MODULE_3__["FhirService"], _angular_core__WEBPACK_IMPORTED_MODULE_0__["NgZone"]])
+        })
+        // TODO: split to services and components
+        ,
+        __metadata("design:paramtypes", [_services_auth_service__WEBPACK_IMPORTED_MODULE_1__["AuthService"], _services_fhir_service__WEBPACK_IMPORTED_MODULE_2__["FhirService"], _angular_core__WEBPACK_IMPORTED_MODULE_0__["NgZone"]])
     ], AppComponent);
     return AppComponent;
 }());
@@ -241,12 +439,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _app_routing_module__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./app-routing.module */ "./src/app/app-routing.module.ts");
 /* harmony import */ var _app_component__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./app.component */ "./src/app/app.component.ts");
 /* harmony import */ var _patient_info_patient_info_component__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./patient-info/patient-info.component */ "./src/app/patient-info/patient-info.component.ts");
+/* harmony import */ var _angular_platform_browser_animations__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/platform-browser/animations */ "./node_modules/@angular/platform-browser/fesm5/animations.js");
+/* harmony import */ var primeng_chart__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! primeng/chart */ "./node_modules/primeng/chart.js");
+/* harmony import */ var primeng_chart__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(primeng_chart__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @angular/forms */ "./node_modules/@angular/forms/fesm5/forms.js");
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+
+
+
 
 
 
@@ -263,7 +468,10 @@ var AppModule = /** @class */ (function () {
             ],
             imports: [
                 _angular_platform_browser__WEBPACK_IMPORTED_MODULE_0__["BrowserModule"],
-                _app_routing_module__WEBPACK_IMPORTED_MODULE_2__["AppRoutingModule"]
+                _angular_platform_browser_animations__WEBPACK_IMPORTED_MODULE_5__["BrowserAnimationsModule"],
+                _app_routing_module__WEBPACK_IMPORTED_MODULE_2__["AppRoutingModule"],
+                primeng_chart__WEBPACK_IMPORTED_MODULE_6__["ChartModule"],
+                _angular_forms__WEBPACK_IMPORTED_MODULE_7__["FormsModule"]
             ],
             providers: [],
             bootstrap: [_app_component__WEBPACK_IMPORTED_MODULE_3__["AppComponent"]]
