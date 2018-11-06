@@ -182,19 +182,22 @@ var AppComponent = /** @class */ (function () {
         // TODO: Handle scope issues over observables
         var _this = this;
         // @ts-ignore
+        /*FHIR.oauth2.ready(smart => {
+          // Get the patient from EMR
+          smart.patient.read().then(smartPatient => {
+            return _this._zone.run(() => {
+              _this.patient = smartPatient.name[0].family + ' ' + smartPatient.name[0].given.join(' ');
+            });
+          });*/
+        // @ts-ignore
         FHIR.oauth2.ready(function (smart) {
-            // Get the patient from EMR
-            smart.patient.read().then(function (smartPatient) {
+            var patientPromise = smart.patient.read().then(function (smartPatient) { return smartPatient; });
+            patientPromise.then(function (smartPatient) {
                 return _this._zone.run(function () {
                     _this.patient = smartPatient.name[0].family + ' ' + smartPatient.name[0].given.join(' ');
+                    console.log('_this.patient', _this.patient);
                 });
             });
-            /*const patientPromise = smart.patient.read().then(smartPatient => smartPatient);
-            patientPromise.then(smartPatient => {
-              return _this._zone.run(() => {
-                _this.patient = smartPatient.name[0].family + ' ' + smartPatient.name[0].given.join(' ');
-              });
-            });*/
             // Get patient's ilnesses
             smart.patient.api.search({ type: 'Condition' })
                 .done(function (conditions) {
