@@ -420,9 +420,9 @@ var AppComponent = /** @class */ (function () {
     // for demostration perposes
     AppComponent.prototype.logout = function () {
         //const redirect = 'https://launch.smarthealthit.org/ehr.html?app=https%3A%2F%2Fsecarle.github.io%2Ftest-smart-fhir%2F%3Flaunch%3DeyJhIjoiMSIsImYiOiIxIn0%26iss%3Dhttps%253A%252F%252Flaunch.smarthealthit.org%252Fv%252Fr2%252Ffhir&user='
-        var redirect = 'https%3A%2F%2Fsecarle.github.io%2Ftest-smart-fhir%2F%3Flaunch%3DeyJhIjoiMSIsImYiOiIxIn0%26iss%3Dhttps%253A%252F%252Flaunch.smarthealthit.org%252Fv%252Fr2%252Ffhir&user=';
+        //const redirect = 'https%3A%2F%2Fsecarle.github.io%2Ftest-smart-fhir%2F%3Flaunch%3DeyJhIjoiMSIsImYiOiIxIn0%26iss%3Dhttps%253A%252F%252Flaunch.smarthealthit.org%252Fv%252Fr2%252Ffhir&user='
         localStorage.clear();
-        location.href = redirect;
+        location.href = 'https://secarle.github.io/test-smart-fhir/';
     };
     AppComponent = __decorate([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Component"])({
