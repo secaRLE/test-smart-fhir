@@ -125,7 +125,7 @@ var AppComponent = /** @class */ (function () {
         this.measurement = { weight: null, height: null };
         this.initialize({
             'client_id': 'dc54d8f3-a83f-4ffd-974c-2ddf98806a98',
-            'scope': 'patient/Patient.read patient/Observation.read launch online_access openid profile'
+            'scope': 'patient/Patient.read patient/Observation.read patient/MedicationOrder.read launch online_access openid profile'
         });
     }
     // Save config to local storage on init
@@ -183,12 +183,10 @@ var AppComponent = /** @class */ (function () {
         var _this = this;
         // @ts-ignore
         FHIR.oauth2.ready(function (smart) {
-            _this._zone.run(function () {
-                // Get the patient from EMR
-                smart.patient.read().then(function (smartPatient) {
-                    return _this._zone.run(function () {
-                        _this.patient = smartPatient.name[0].family + ' ' + smartPatient.name[0].given.join(' ');
-                    });
+            // Get the patient from EMR
+            smart.patient.read().then(function (smartPatient) {
+                return _this._zone.run(function () {
+                    _this.patient = smartPatient.name[0].family + ' ' + smartPatient.name[0].given.join(' ');
                 });
             });
             // @ts-ignore
