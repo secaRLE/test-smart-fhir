@@ -125,7 +125,7 @@ var AppComponent = /** @class */ (function () {
         this.measurement = { weight: null, height: null };
         this.initialize({
             'client_id': 'dc54d8f3-a83f-4ffd-974c-2ddf98806a98',
-            'scope': 'patient/Patient.read patient/Observation.read patient/MedicationOrder.read launch online_access openid profile'
+            'scope': 'patient/Patient.read patient/Observation.read patient/Condition.read patient/MedicationOrder.read launch online_access openid profile'
         });
     }
     // Save config to local storage on init
