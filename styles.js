@@ -40,7 +40,7 @@ module.exports = [[module.i, "@charset \"UTF-8\";\n/* open-sans-300 - latin */\n
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = [[module.i, "/* You can add global styles to this file, and also import other style files */\n\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInNyYy9DOlxcV29ya3NwYWNlXFxTTUFSVCBvbiBGSElSXFxmaGlyL3NyY1xcc3R5bGVzLnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEsK0VBQStFIiwiZmlsZSI6InNyYy9zdHlsZXMuc2NzcyIsInNvdXJjZXNDb250ZW50IjpbIi8qIFlvdSBjYW4gYWRkIGdsb2JhbCBzdHlsZXMgdG8gdGhpcyBmaWxlLCBhbmQgYWxzbyBpbXBvcnQgb3RoZXIgc3R5bGUgZmlsZXMgKi9cbiJdfQ== */", '', '']]
+module.exports = [[module.i, "body {\n  font-family: \"Open Sans\", \"Helvetica Neue\", sans-serif;\n  font-size: 14px; }\n\nh1 {\n  font-size: 27px; }\n\nh2 {\n  font-size: 22px;\n  margin-top: 0; }\n\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInNyYy9DOlxcV29ya3NwYWNlXFxTTUFSVCBvbiBGSElSXFxmaGlyL3NyY1xcc3R5bGVzLnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7RUFDRSx1REFBc0Q7RUFDdEQsZ0JBQWUsRUFDaEI7O0FBRUQ7RUFDRSxnQkFBZSxFQUNoQjs7QUFFRDtFQUNFLGdCQUFlO0VBQ2YsY0FBYSxFQUNkIiwiZmlsZSI6InNyYy9zdHlsZXMuc2NzcyIsInNvdXJjZXNDb250ZW50IjpbImJvZHkge1xuICBmb250LWZhbWlseTogXCJPcGVuIFNhbnNcIiwgXCJIZWx2ZXRpY2EgTmV1ZVwiLCBzYW5zLXNlcmlmO1xuICBmb250LXNpemU6IDE0cHg7XG59XG5cbmgxIHtcbiAgZm9udC1zaXplOiAyN3B4O1xufVxuXG5oMiB7XG4gIGZvbnQtc2l6ZTogMjJweDtcbiAgbWFyZ2luLXRvcDogMDtcbn1cbiJdfQ== */", '', '']]
 
 /***/ }),
 

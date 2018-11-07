@@ -74,7 +74,7 @@ var AppRoutingModule = /** @class */ (function () {
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<!--The content below is only a placeholder and can be replaced.-->\n<div *ngIf=\"!displaySignInButton\">\n\n  <div style=\"margin-left: 30px;\">\n    <h1 *ngIf=\"patient\">Welcome {{ patient }}!</h1>\n    <a href=\"https://launch.smarthealthit.org/ehr.html?app=https%3A%2F%2Fsecarle.github.io%2Ftest-smart-fhir%2F%3Flaunch%3DeyJhIjoiMSIsImYiOiIxIn0%26iss%3Dhttps%253A%252F%252Flaunch.smarthealthit.org%252Fv%252Fr2%252Ffhir&user=\"\n       (click)=\"logout()\" target=\"_blank\" style=\"position: absolute; right: 30px; top: 20px;\">\n      Logout and try another patient\n    </a>\n  </div>\n\n  <div style=\"width: 40%; float: left; padding-left: 30px;\">\n    <h2>Here is some data for you:</h2>\n\n    <p>Prescriptions:</p>\n    <ul>\n      <li *ngFor=\"let order of orders\">{{order}}</li>\n    </ul>\n\n    <p>Conditions:</p>\n    <ul>\n      <li *ngFor=\"let condition of conditions\">{{condition}}</li>\n    </ul>\n\n    <div style=\"padding: 10px; border-top: 1px solid gray; max-width: 90%;\">\n      <h3>Create new measurement data</h3>\n      <form #measurementForm=\"ngForm\" (ngSubmit)=\"createObservation()\">\n        <input name=\"weight\" type=\"number\" placeholder=\"Weight\" [(ngModel)]=\"measurement.weight\"> kg<br><br>\n        <input name=\"height\" type=\"number\" placeholder=\"Height\" [(ngModel)]=\"measurement.height\"> cm<br><br>\n        <button type=\"submit\">Add measurements</button>\n      </form>\n    </div>\n\n    <div *ngIf=\"observations\">\n      <h2 style=\"display: inline-block; padding-right: 30px;\">All measurements ({{observations.length}})</h2>\n      <button style=\"display: inline-block;\" (click)=\"getObservation()\">Reload</button>\n      <ul>\n        <li *ngFor=\"let obs of observations\" style=\"margin-bottom: 5px\">\n          <span *ngIf=\"!obs.code; else observation\">Is being deleted...</span>\n          <ng-template #observation>\n            {{obs?.code?.text}}: {{obs?.valueQuantity?.value}} {{obs?.valueQuantity?.unit}}\n            <button (click)=\"deleteObservation(obs)\" style=\"float: right;\">Delete</button>\n          </ng-template>\n          <br><span style=\"font-size: 12px\">(resourceId: {{obs?.id}})</span>\n        </li>\n      </ul>\n    </div>\n  </div>\n\n  <div style=\"width: 60%; float: right; padding-right: 30px;\">\n    <p-chart type=\"line\" [data]=\"visualizationData\"></p-chart>\n  </div>\n</div>\n\n<div *ngIf=\"displaySignInButton\">\n  <p>You are not yet authorized, please sign in</p>\n  <button (click)=\"authorize()\">Sign in</button>\n</div>\n\n\n<router-outlet></router-outlet>\n"
+module.exports = "<!--The content below is only a placeholder and can be replaced.-->\n<div *ngIf=\"!displaySignInButton\">\n\n  <div style=\"margin-left: 30px;\">\n    <h1 *ngIf=\"patient\">Welcome {{ patient }}!</h1>\n    <a href=\"https://launch.smarthealthit.org/ehr.html?app=https%3A%2F%2Fsecarle.github.io%2Ftest-smart-fhir%2F%3Flaunch%3DeyJhIjoiMSIsImYiOiIxIn0%26iss%3Dhttps%253A%252F%252Flaunch.smarthealthit.org%252Fv%252Fr2%252Ffhir&user=\"\n       (click)=\"logout()\" target=\"_blank\" style=\"position: absolute; right: 30px; top: 20px;\">\n      Logout and try another patient\n    </a>\n  </div>\n\n  <div style=\"width: 40%; float: left; padding-left: 30px;\">\n    <h2>Here is some data for you:</h2>\n\n    <p>Prescriptions:</p>\n    <ul>\n      <li *ngFor=\"let order of orders\">{{order}}</li>\n    </ul>\n\n    <p>Conditions:</p>\n    <ul>\n      <li *ngFor=\"let condition of conditions\">{{condition}}</li>\n    </ul>\n\n    <div style=\"padding: 10px; border-top: 1px solid gray; max-width: 90%;\">\n      <h3>Create new measurement data</h3>\n      <form #measurementForm=\"ngForm\" (ngSubmit)=\"createObservation(measurementForm.form.value); measurementForm.reset()\">\n        <input name=\"weight\" type=\"number\" placeholder=\"Weight\" [(ngModel)]=\"measurement.weight\" required> kg<br><br>\n        <input name=\"height\" type=\"number\" placeholder=\"Height\" [(ngModel)]=\"measurement.height\" required> cm<br><br>\n        <button type=\"submit\" [disabled]=\"!measurementForm.form.valid\">Add measurements</button><br><br>\n      </form>\n    </div>\n\n    <div *ngIf=\"observations\">\n      <h2 style=\"display: inline-block; padding-right: 30px;\">All measurements ({{observations.length}})</h2>\n      <button style=\"display: inline-block;\" (click)=\"getObservation()\">Reload</button>\n      <ul>\n        <li *ngFor=\"let obs of observations\" style=\"margin-bottom: 5px\">\n          <span *ngIf=\"!obs.code; else observation\"><i>Is being deleted...</i></span>\n          <ng-template #observation>\n            {{obs?.code?.text}}: {{obs?.valueQuantity?.value}} {{obs?.valueQuantity?.unit}}\n            <button (click)=\"deleteObservation(obs)\" style=\"float: right;\">Delete</button>\n          </ng-template>\n          <br><span style=\"font-size: 12px\">(resourceId: {{obs?.id}})</span>\n        </li>\n      </ul>\n    </div>\n  </div>\n\n  <div style=\"width: 60%; float: right; padding-right: 30px;\">\n    <p-chart type=\"line\" [data]=\"visualizationData\"></p-chart>\n  </div>\n</div>\n\n<div *ngIf=\"displaySignInButton\">\n  <p>You are not yet authorized, please sign in</p>\n  <button (click)=\"authorize()\">Sign in</button>\n</div>\n\n<p-toast [style]=\"{marginTop: '40px'}\"></p-toast>\n\n<router-outlet></router-outlet>\n\n"
 
 /***/ }),
 
@@ -101,7 +101,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AppComponent", function() { return AppComponent; });
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
 /* harmony import */ var _services_auth_service__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./services/auth.service */ "./src/app/services/auth.service.ts");
-/* harmony import */ var _services_fhir_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./services/fhir.service */ "./src/app/services/fhir.service.ts");
+/* harmony import */ var primeng_api__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! primeng/api */ "./node_modules/primeng/api.js");
+/* harmony import */ var primeng_api__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(primeng_api__WEBPACK_IMPORTED_MODULE_2__);
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -115,9 +116,9 @@ var __metadata = (undefined && undefined.__metadata) || function (k, v) {
 
 
 var AppComponent = /** @class */ (function () {
-    function AppComponent(auth, fhir, _zone) {
+    function AppComponent(auth, messageService, _zone) {
         this.auth = auth;
-        this.fhir = fhir;
+        this.messageService = messageService;
         this._zone = _zone;
         this.title = 'Test SMART on FHIR';
         this.orders = [];
@@ -320,7 +321,7 @@ var AppComponent = /** @class */ (function () {
             borderColor: '#FFD800'
         };
     };
-    AppComponent.prototype.createObservation = function () {
+    AppComponent.prototype.createObservation = function (val) {
         var _this_1 = this;
         // @ts-ignore
         FHIR.oauth2.ready(function (smart) {
@@ -348,7 +349,7 @@ var AppComponent = /** @class */ (function () {
                 'effectiveDateTime': date,
                 'issued': date,
                 'valueQuantity': {
-                    'value': _this_1.measurement.height,
+                    'value': val.height,
                     'unit': 'cm',
                     'system': 'http://unitsofmeasure.org/',
                     'code': 'cm'
@@ -381,7 +382,7 @@ var AppComponent = /** @class */ (function () {
                 'effectiveDateTime': date,
                 'issued': date,
                 'valueQuantity': {
-                    'value': _this_1.measurement.weight,
+                    'value': val.weight,
                     'unit': 'kg',
                     'system': 'http://unitsofmeasure.org/',
                     'code': 'kg'
@@ -391,7 +392,16 @@ var AppComponent = /** @class */ (function () {
                 console.log(resp);
             }).then(function () {
                 smart.api.create({ resource: resourceWeight }).then(function (res) {
-                    console.log(res);
+                    _this_1._zone.run(function () {
+                        if (res.status === 'success') {
+                            console.log('Success!');
+                            _this_1.messageService.add({
+                                severity: 'success',
+                                summary: 'Measurements saved',
+                                detail: 'Please click the Reload button if you don\'t see the measurements in the list. It could take some time until they are finally settled in the Simulated EHR.'
+                            });
+                        }
+                    });
                 });
             });
         });
@@ -419,21 +429,19 @@ var AppComponent = /** @class */ (function () {
     };
     // for demostration perposes
     AppComponent.prototype.logout = function () {
-        //const redirect = 'https://launch.smarthealthit.org/ehr.html?app=https%3A%2F%2Fsecarle.github.io%2Ftest-smart-fhir%2F%3Flaunch%3DeyJhIjoiMSIsImYiOiIxIn0%26iss%3Dhttps%253A%252F%252Flaunch.smarthealthit.org%252Fv%252Fr2%252Ffhir&user='
-        //const redirect = 'https%3A%2F%2Fsecarle.github.io%2Ftest-smart-fhir%2F%3Flaunch%3DeyJhIjoiMSIsImYiOiIxIn0%26iss%3Dhttps%253A%252F%252Flaunch.smarthealthit.org%252Fv%252Fr2%252Ffhir&user='
         localStorage.clear();
-        //window.parent.location.reload();
-        location.href = 'https://launch.smarthealthit.org/ehr.html?app=https%3A%2F%2Fsecarle.github.io%2Ftest-smart-fhir%2F%3Flaunch%3DeyJhIjoiMSIsImYiOiIxIn0%26iss%3Dhttps%253A%252F%252Flaunch.smarthealthit.org%252Fv%252Fr2%252Ffhir&user=';
+        //location.href = 'https://launch.smarthealthit.org/ehr.html?app=https%3A%2F%2Fsecarle.github.io%2Ftest-smart-fhir%2F%3Flaunch%3DeyJhIjoiMSIsImYiOiIxIn0%26iss%3Dhttps%253A%252F%252Flaunch.smarthealthit.org%252Fv%252Fr2%252Ffhir&user=';
     };
     AppComponent = __decorate([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Component"])({
+            providers: [primeng_api__WEBPACK_IMPORTED_MODULE_2__["MessageService"]],
             selector: 'app-root',
             template: __webpack_require__(/*! ./app.component.html */ "./src/app/app.component.html"),
             styles: [__webpack_require__(/*! ./app.component.scss */ "./src/app/app.component.scss")]
         })
         // TODO: split to services and components
         ,
-        __metadata("design:paramtypes", [_services_auth_service__WEBPACK_IMPORTED_MODULE_1__["AuthService"], _services_fhir_service__WEBPACK_IMPORTED_MODULE_2__["FhirService"], _angular_core__WEBPACK_IMPORTED_MODULE_0__["NgZone"]])
+        __metadata("design:paramtypes", [_services_auth_service__WEBPACK_IMPORTED_MODULE_1__["AuthService"], primeng_api__WEBPACK_IMPORTED_MODULE_2__["MessageService"], _angular_core__WEBPACK_IMPORTED_MODULE_0__["NgZone"]])
     ], AppComponent);
     return AppComponent;
 }());
@@ -461,12 +469,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var primeng_chart__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! primeng/chart */ "./node_modules/primeng/chart.js");
 /* harmony import */ var primeng_chart__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(primeng_chart__WEBPACK_IMPORTED_MODULE_6__);
 /* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @angular/forms */ "./node_modules/@angular/forms/fesm5/forms.js");
+/* harmony import */ var primeng_toast__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! primeng/toast */ "./node_modules/primeng/toast.js");
+/* harmony import */ var primeng_toast__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(primeng_toast__WEBPACK_IMPORTED_MODULE_8__);
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+
 
 
 
@@ -489,7 +500,8 @@ var AppModule = /** @class */ (function () {
                 _angular_platform_browser_animations__WEBPACK_IMPORTED_MODULE_5__["BrowserAnimationsModule"],
                 _app_routing_module__WEBPACK_IMPORTED_MODULE_2__["AppRoutingModule"],
                 primeng_chart__WEBPACK_IMPORTED_MODULE_6__["ChartModule"],
-                _angular_forms__WEBPACK_IMPORTED_MODULE_7__["FormsModule"]
+                _angular_forms__WEBPACK_IMPORTED_MODULE_7__["FormsModule"],
+                primeng_toast__WEBPACK_IMPORTED_MODULE_8__["ToastModule"]
             ],
             providers: [],
             bootstrap: [_app_component__WEBPACK_IMPORTED_MODULE_3__["AppComponent"]]
@@ -604,74 +616,6 @@ var AuthService = /** @class */ (function () {
         })
     ], AuthService);
     return AuthService;
-}());
-
-
-
-/***/ }),
-
-/***/ "./src/app/services/fhir.service.ts":
-/*!******************************************!*\
-  !*** ./src/app/services/fhir.service.ts ***!
-  \******************************************/
-/*! exports provided: FhirService */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FhirService", function() { return FhirService; });
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! rxjs */ "./node_modules/rxjs/_esm5/index.js");
-var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (undefined && undefined.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-
-
-// import * as fh from 'fhir-js-client';
-var FhirService = /** @class */ (function () {
-    function FhirService() {
-        this.smartClient = new rxjs__WEBPACK_IMPORTED_MODULE_1__["BehaviorSubject"](null);
-        this.smartClient$ = this.smartClient.asObservable();
-        //console.log(this._smartClient);
-    }
-    FhirService.prototype.authorizeClient = function (config) {
-        // @ts-ignore
-        FHIR.oauth2.authorize(config);
-    };
-    FhirService.prototype.completeAuthentication = function () {
-        //console.log('completeAuthentication');
-        // @ts-ignore
-        return FHIR.oauth2.ready(this.onReady, this.onError);
-    };
-    // @ts-ignore
-    FhirService.prototype.onReady = function (smartClient) {
-        this._smartClient = smartClient;
-        localStorage.setItem('token', smartClient.tokenResponse.access_token);
-        this.smartClient.next(smartClient);
-        if (smartClient.hasOwnProperty('patient')) {
-            alert('patient');
-        }
-        else {
-            alert('no patient');
-        }
-    };
-    FhirService.prototype.onError = function (err) {
-        localStorage.removeItem('token');
-        this.smartClient.next(null);
-    };
-    FhirService = __decorate([
-        Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Injectable"])({
-            providedIn: 'root'
-        }),
-        __metadata("design:paramtypes", [])
-    ], FhirService);
-    return FhirService;
 }());
 
 
